@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Defining JSON body for startEvent(). It requires 2 JSON key's, eventID. startDate.
+// Defining JSON body for startEvent(). It requires 2 JSON key's, eventID, startDate.
 type StartEventParameters struct {
 	EventID   string `json:"eventID" binding:"required"`
 	StartDate string `json:"startDate" binding:"required"`
@@ -80,7 +80,7 @@ func startEvent(c *gin.Context) {
 
 }
 
-// Defining JSON body for finishEvent(). It requires 2 JSON key's, eventID. finishDate.
+// Defining JSON body for finishEvent(). It requires 2 JSON key's, eventID, finishDate.
 type FinishEventParameters struct {
 	EventID    string `json:"eventID" binding:"required"`
 	FinishDate string `json:"finishDate" binding:"required"`
@@ -161,6 +161,58 @@ func finishEvent(c *gin.Context) {
 
 	} else {
 		c.JSON(404, gin.H{"status": "No Event with ID, " + finishEventParameters.EventID + " exists"})
+	}
+
+}
+
+// Defining JSON body for resetEventDates(). It requires 1 JSON key, eventID.
+type ResetEventParameters struct {
+	EventID string `json:"eventID" binding:"required"`
+}
+
+// Starts an unfinished Event
+func resetEventDates(c *gin.Context) {
+
+	// Variables for DB and Error
+	var db *sql.DB
+	var err error
+
+	// Creating an instance of the struct, ResetEventParameters
+	var resetEventParameters ResetEventParameters
+
+	// Bind to the struct's members. If any member is invalid, binding does not happen and an error will be returned. Then its rejected with 400
+	if c.BindJSON(&resetEventParameters) != nil {
+		c.JSON(400, gin.H{"status": "Incorrect parameters, please provide all required parameters"})
+		return
+	}
+
+	// Connect to the DB. If there is any issue connecting to the DB, throw a 500 error and return
+	db, err = sql.Open("sqlite", "./EVENTPLANNER.db")
+	if err != nil {
+		c.JSON(500, gin.H{"status": "Could not connect to DB"})
+		return
+	}
+	defer db.Close()
+
+	// Check if the EventID exists in the DB by querying for the ID
+	// Result is scanned into the variable, checkEvent
+	queryToCheckExistingBook := `SELECT ID FROM EVENTPLANNER WHERE ID=$1;`
+	result := db.QueryRow(queryToCheckExistingBook, resetEventParameters.EventID)
+	var checkResult string
+	result.Scan(&checkResult)
+
+	// If the length of checkResult is greater than 0, means the query returned a result, so there is an event by that ID
+	// So, reset its start and end date
+	// Else, its rejected with a 404 as there is no event by that ID
+	if len(checkResult) > 0 {
+
+		// Reset event start and end date
+		queryToUpdateAnEvent := `UPDATE EVENTPLANNER SET START_DATE = $1, END_DATE = $2 WHERE ID = $3;`
+		db.QueryRow(queryToUpdateAnEvent, 0, 0, resetEventParameters.EventID)
+		c.JSON(200, gin.H{"status": "Event, " + resetEventParameters.EventID + " reset."})
+
+	} else {
+		c.JSON(404, gin.H{"status": "No Event with ID, " + resetEventParameters.EventID + " exists"})
 	}
 
 }
