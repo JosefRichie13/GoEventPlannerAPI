@@ -22,6 +22,7 @@ func main() {
 	request.PUT("/updateEvent", updateEvent)
 	request.PUT("/uploadMedia", uploadMedia)
 	request.GET("/getAllEvents", getAllEvents)
+	request.GET("/getEventDetails", getEventDetails)
 	request.Run(":8083")
 
 }
