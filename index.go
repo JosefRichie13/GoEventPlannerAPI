@@ -6,6 +6,7 @@ import (
 
 	_ "modernc.org/sqlite"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,6 +14,13 @@ func main() {
 
 	request := gin.Default()
 	request.MaxMultipartMemory = 8 << 20
+
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowAllOrigins = true // Allow all origins for development (consider origin restriction for production)
+	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	corsConfig.AllowHeaders = []string{"Origin", "Content-Type", "Authorization"}
+	request.Use(cors.New(corsConfig))
+
 	request.Static("/media", "./media")
 	request.GET("/", landingPage)
 	request.POST("/createAnEvent", createAnEvent)
@@ -23,6 +31,7 @@ func main() {
 	request.PUT("/uploadMedia", uploadMedia)
 	request.GET("/getAllEvents", getAllEvents)
 	request.GET("/getEventDetails", getEventDetails)
+	request.GET("/getEventMedia", getEventMedia)
 	request.Run(":8083")
 
 }
@@ -30,6 +39,11 @@ func main() {
 // Landing page route
 func landingPage(c *gin.Context) {
 	c.JSON(200, gin.H{"status": "Welcome to Event Planner API, currently being built !!!"})
+}
+
+// Landing page route
+func getEventMedia(c *gin.Context) {
+	c.File("./media/Event.html")
 }
 
 // Defining JSON body for createAnEvent(). It requires 2 JSON key's eventName, eventDescription.

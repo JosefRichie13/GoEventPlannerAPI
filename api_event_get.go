@@ -205,7 +205,7 @@ func getEventDetails(c *gin.Context) {
 		// Iterate over the files and append the file URL to the slice
 		// Sample URL that is generated http://192.168.1.109:8083/media/0fb966f09d3a4a18b7ae65b57eb01e96/1726650904_QA_PFE's.PNG
 		for _, file := range files {
-			getEventMediaLocation = append(getEventMediaLocation, getLocalIP()+":8083"+getEventDetails.Media[1:]+"/"+file.Name())
+			getEventMediaLocation = append(getEventMediaLocation, getEventDetails.Media[1:]+"/"+file.Name())
 		}
 
 		c.JSON(200, gin.H{"eventID": getEventDetails.ID, "eventName": getEventDetails.Name, "eventDescription": getEventDetails.Description, "eventAttendees": getEventDetails.Atendees,
