@@ -12,12 +12,14 @@ import (
 func main() {
 
 	request := gin.Default()
+	request.MaxMultipartMemory = 8 << 20
 	request.GET("/", landingPage)
 	request.POST("/createAnEvent", createAnEvent)
 	request.PUT("/startEvent", startEvent)
 	request.PUT("/finishEvent", finishEvent)
 	request.PUT("/resetEventDates", resetEventDates)
 	request.PUT("/updateEvent", updateEvent)
+	request.PUT("/uploadMedia", uploadMedia)
 	request.Run(":8083")
 
 }

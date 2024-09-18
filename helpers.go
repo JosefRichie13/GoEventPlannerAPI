@@ -77,3 +77,10 @@ func convertEpochToDate(epochTime int) string {
 	return t.Format("02-Jan-2006")
 
 }
+
+// Gets current timestamp in Epoch time
+func currentTimestamp() int {
+	now := time.Now().UTC()
+	epochTime := now.Unix()
+	return int(epochTime)
+}
