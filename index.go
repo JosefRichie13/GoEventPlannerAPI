@@ -15,6 +15,7 @@ func main() {
 	request.GET("/", landingPage)
 	request.POST("/createAnEvent", createAnEvent)
 	request.PUT("/startEvent", startEvent)
+	request.PUT("/finishEvent", finishEvent)
 	request.Run(":8083")
 
 }
