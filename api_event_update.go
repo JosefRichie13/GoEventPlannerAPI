@@ -45,7 +45,7 @@ func startEvent(c *gin.Context) {
 	defer db.Close()
 
 	// Check if the EventID exists in the DB by querying for the ID
-	// Result is scanned into the variable, checkResult
+	// Result is scanned into the variable, checkEvent
 	queryToCheckExistingBook := `SELECT ID, START_DATE FROM EVENTPLANNER WHERE ID=$1;`
 	result := db.QueryRow(queryToCheckExistingBook, startEventParameters.EventID)
 
@@ -58,7 +58,7 @@ func startEvent(c *gin.Context) {
 	var checkEvent CheckEvent
 	result.Scan(&checkEvent.checkID, &checkEvent.checkStartDate)
 
-	// If the length of checkResult is greater than 0, means the query returned a result, so there is an event by that ID
+	// If the length of checkEvent.checkID is greater than 0, means the query returned a result, so there is an event by that ID
 	// So, update its start date
 	// Else, its rejected with a 404 as there is no event by that ID
 	if len(checkEvent.checkID) > 0 {
@@ -117,7 +117,7 @@ func finishEvent(c *gin.Context) {
 	defer db.Close()
 
 	// Check if the EventID exists in the DB by querying for the ID and START_DATE
-	// Result is scanned into the variable, checkResult
+	// Result is scanned into the variable, checkEvent
 	queryToCheckExistingBook := `SELECT ID, START_DATE, END_DATE FROM EVENTPLANNER WHERE ID=$1;`
 	result := db.QueryRow(queryToCheckExistingBook, finishEventParameters.EventID)
 
@@ -131,7 +131,7 @@ func finishEvent(c *gin.Context) {
 	var checkEvent CheckEvent
 	result.Scan(&checkEvent.checkID, &checkEvent.checkStartDate, &checkEvent.checkFinishDate)
 
-	// If the length of checkResult is greater than 0, means the query returned a result, so there is an event by that ID
+	// If the length of checkEvent.checkID is greater than 0, means the query returned a result, so there is an event by that ID
 	// So, update its finish date
 	// Else, its rejected with a 404 as there is no event by that ID
 	if len(checkEvent.checkID) > 0 {
@@ -195,7 +195,7 @@ func resetEventDates(c *gin.Context) {
 	defer db.Close()
 
 	// Check if the EventID exists in the DB by querying for the ID
-	// Result is scanned into the variable, checkEvent
+	// Result is scanned into the variable, checkResult
 	queryToCheckExistingBook := `SELECT ID FROM EVENTPLANNER WHERE ID=$1;`
 	result := db.QueryRow(queryToCheckExistingBook, resetEventParameters.EventID)
 	var checkResult string
@@ -213,6 +213,61 @@ func resetEventDates(c *gin.Context) {
 
 	} else {
 		c.JSON(404, gin.H{"status": "No Event with ID, " + resetEventParameters.EventID + " exists"})
+	}
+
+}
+
+// Defining JSON body for updateEventDates(). It requires 4 JSON key, eventID, eventName, eventDescription, eventAtendees
+type UpdateEventParameters struct {
+	EventID          string `json:"eventID" binding:"required"`
+	EventName        string `json:"eventName" binding:"required"`
+	EventDescription string `json:"eventDescription" binding:"required"`
+	EventAtendees    int    `json:"eventAtendees" binding:"required"`
+}
+
+// Update an event's name, atendees and description
+func updateEvent(c *gin.Context) {
+
+	// Variables for DB and Error
+	var db *sql.DB
+	var err error
+
+	// Creating an instance of the struct, UpdateEventParameters
+	var updateEventParameters UpdateEventParameters
+
+	// Bind to the struct's members. If any member is invalid, binding does not happen and an error will be returned. Then its rejected with 400
+	if c.BindJSON(&updateEventParameters) != nil {
+		c.JSON(400, gin.H{"status": "Incorrect parameters, please provide all required parameters"})
+		return
+	}
+
+	// Connect to the DB. If there is any issue connecting to the DB, throw a 500 error and return
+	db, err = sql.Open("sqlite", "./EVENTPLANNER.db")
+	if err != nil {
+		c.JSON(500, gin.H{"status": "Could not connect to DB"})
+		return
+	}
+	defer db.Close()
+
+	// Check if the EventID exists in the DB by querying for the ID
+	// Result is scanned into the variable, checkResult
+	queryToCheckExistingBook := `SELECT ID FROM EVENTPLANNER WHERE ID=$1;`
+	result := db.QueryRow(queryToCheckExistingBook, updateEventParameters.EventID)
+	var checkResult string
+	result.Scan(&checkResult)
+
+	// If the length of checkResult is greater than 0, means the query returned a result, so there is an event by that ID
+	// So, update its details
+	// Else, its rejected with a 404 as there is no event by that ID
+	if len(checkResult) > 0 {
+
+		// Update event details
+		queryToUpdateAnEvent := `UPDATE EVENTPLANNER SET NAME = $1, DESCRIPTION = $2, ATENDEES = $3 WHERE ID = $4;`
+		db.QueryRow(queryToUpdateAnEvent, updateEventParameters.EventName, updateEventParameters.EventDescription, updateEventParameters.EventAtendees, updateEventParameters.EventID)
+		c.JSON(200, gin.H{"status": "Event, " + updateEventParameters.EventID + " updated."})
+
+	} else {
+		c.JSON(404, gin.H{"status": "No Event with ID, " + updateEventParameters.EventID + " exists"})
 	}
 
 }

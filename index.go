@@ -17,6 +17,7 @@ func main() {
 	request.PUT("/startEvent", startEvent)
 	request.PUT("/finishEvent", finishEvent)
 	request.PUT("/resetEventDates", resetEventDates)
+	request.PUT("/updateEvent", updateEvent)
 	request.Run(":8083")
 
 }
