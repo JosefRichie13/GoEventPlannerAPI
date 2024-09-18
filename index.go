@@ -14,6 +14,7 @@ func main() {
 	request := gin.Default()
 	request.GET("/", landingPage)
 	request.POST("/createAnEvent", createAnEvent)
+	request.PUT("/startEvent", startEvent)
 	request.Run(":8083")
 
 }
