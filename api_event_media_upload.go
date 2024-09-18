@@ -16,7 +16,7 @@ type UploadMediaParameters struct {
 	EventID string `form:"eventID" binding:"required"`
 }
 
-// Starts an unfinished Event
+// Uploads media to an event
 func uploadMedia(c *gin.Context) {
 
 	// Variables for DB and Error
@@ -42,8 +42,8 @@ func uploadMedia(c *gin.Context) {
 
 	// Check if the EventID exists in the DB by querying for the ID
 	// Result is scanned into the variable, checkEvent
-	queryToCheckExistingBook := `SELECT ID, MEDIA FROM EVENTPLANNER WHERE ID=$1;`
-	result := db.QueryRow(queryToCheckExistingBook, uploadMediaParameters.EventID)
+	queryToCheckExistingEvent := `SELECT ID, MEDIA FROM EVENTPLANNER WHERE ID=$1;`
+	result := db.QueryRow(queryToCheckExistingEvent, uploadMediaParameters.EventID)
 
 	// Defining a struct to hold the data queried by the query and scanning into it
 	type CheckEvent struct {

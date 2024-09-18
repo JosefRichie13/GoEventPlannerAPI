@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"net"
 	"regexp"
 	"strings"
 	"time"
@@ -78,9 +80,22 @@ func convertEpochToDate(epochTime int) string {
 
 }
 
-// Gets current timestamp in Epoch time
+// Returns the current timestamp in Epoch time
 func currentTimestamp() int {
 	now := time.Now().UTC()
 	epochTime := now.Unix()
 	return int(epochTime)
+}
+
+// Returns the local IP as a string
+func getLocalIP() string {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		fmt.Println("Could not get IP address")
+	}
+	defer conn.Close()
+
+	localAddress := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddress.IP.String()
 }
