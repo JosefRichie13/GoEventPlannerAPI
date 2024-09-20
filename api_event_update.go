@@ -222,7 +222,7 @@ type UpdateEventParameters struct {
 	EventID          string `json:"eventID" binding:"required"`
 	EventName        string `json:"eventName" binding:"required"`
 	EventDescription string `json:"eventDescription" binding:"required"`
-	EventAtendees    int    `json:"eventAtendees" binding:"required"`
+	EventAtendees    *int   `json:"eventAtendees" binding:"required,numeric,gte=0"` // Using pointer to allow 0 values
 }
 
 // Update an event's name, atendees and description
