@@ -39,6 +39,7 @@ func main() {
 	request.GET("/getEventDetails", getEventDetails)
 	request.GET("/getEventDetailsPage", getEventDetailsPage)
 	request.DELETE("/deleteEvent", deleteEvent)
+	request.DELETE("/deleteEventMedia", deleteEventMedia)
 	request.Run(":8083")
 
 }
