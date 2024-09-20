@@ -13,15 +13,21 @@ import (
 func main() {
 
 	request := gin.Default()
+
+	// Configuring 8mb for file uploads
 	request.MaxMultipartMemory = 8 << 20
 
+	// CORS related settings, allows all
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowAllOrigins = true // Allow all origins for development (consider origin restriction for production)
+	corsConfig.AllowAllOrigins = true
 	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	corsConfig.AllowHeaders = []string{"Origin", "Content-Type", "Authorization"}
 	request.Use(cors.New(corsConfig))
 
+	// Mounting the static folder and templates folder
 	request.Static("/media", "./media")
+	request.LoadHTMLGlob("templates/*")
+
 	request.GET("/", landingPage)
 	request.POST("/createAnEvent", createAnEvent)
 	request.PUT("/startEvent", startEvent)
@@ -31,7 +37,7 @@ func main() {
 	request.PUT("/uploadMedia", uploadMedia)
 	request.GET("/getAllEvents", getAllEvents)
 	request.GET("/getEventDetails", getEventDetails)
-	request.GET("/getEventMedia", getEventMedia)
+	request.GET("/getEventDetailsPage", getEventDetailsPage)
 	request.Run(":8083")
 
 }
@@ -41,9 +47,24 @@ func landingPage(c *gin.Context) {
 	c.JSON(200, gin.H{"status": "Welcome to Event Planner API, currently being built !!!"})
 }
 
-// Landing page route
-func getEventMedia(c *gin.Context) {
-	c.File("./media/Event.html")
+// Defining JSON body for getEventMedia(). It requires 1 Query Parameter eventID.
+type ShowEventDetailParam struct {
+	EventID string `form:"eventID" binding:"required"`
+}
+
+// Show Event Details in a HTML page
+func getEventDetailsPage(c *gin.Context) {
+
+	// Creating an instance of the struct, ShowEventDetailParam
+	var showEventDetailParam ShowEventDetailParam
+
+	// Bind to the struct's members. If any member is invalid, binding does not happen and an error will be returned. Then its rejected with 400
+	if c.Bind(&showEventDetailParam) != nil {
+		c.JSON(400, gin.H{"status": "Incorrect parameters, please provide all required parameters"})
+		return
+	}
+
+	c.HTML(200, "Event.html", gin.H{"eventID": showEventDetailParam.EventID})
 }
 
 // Defining JSON body for createAnEvent(). It requires 2 JSON key's eventName, eventDescription.
