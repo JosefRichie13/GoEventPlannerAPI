@@ -47,7 +47,7 @@ func main() {
 
 // Landing page route
 func landingPage(c *gin.Context) {
-	c.JSON(200, gin.H{"status": "Welcome to Event Planner API, currently being built !!!"})
+	c.File("GoEventPlanner.html")
 }
 
 // Defining JSON body for getEventMedia(). It requires 1 Query Parameter eventID.
