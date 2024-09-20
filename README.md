@@ -2,6 +2,15 @@
 
 This repo has the code for an Event Planner App Backend. <br><br>
 
+The basic flow of the App is 
+
+* User creates an event, receives an ID in return
+* User can start the event
+* User can finish only a started event
+* User can upload media files to the event
+* User can get event details
+* User can delete event, event media or specific media <br><br>
+
 The below REST API endpoints are exposed
 
 * POST /createAnEvent -- Creates an Event
